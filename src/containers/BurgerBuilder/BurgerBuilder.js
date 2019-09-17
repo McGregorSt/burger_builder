@@ -29,6 +29,7 @@ class BurgerBuilder extends Component {
     }
 
     componentDidMount () {
+        console.log('brrr', this.props)
         axios.get('https://react-burger-builder-mcgs.firebaseio.com/ingredients.json')
             .then(resp => {
                 this.setState({ ingredients: resp.data})
@@ -93,30 +94,20 @@ class BurgerBuilder extends Component {
 
         this.setState({ loading: true })
 
-        const order = {
-            ingredients: this.state.ingredients,
-            price: this.state.totalPrice,
-            customer: {
-                name: 'Gregor St',
-                address: {
-                    street: 'Leicester Rd 2',
-                    zipCode: '21344',
-                    country: 'Poland'
-                },
-                email: 'test@test.com'
-            },
-            deliveryMethod: 'fastest'
+        this.props.history.push('/checkout')
+        const queryParams = []
+        for (let i in this.state.ingredients) {
+            queryParams.push(encodeURIComponent(i) + '=' + encodeURIComponent(this.state.ingredients[i]))
         }
-        axios.post('/orders.json', order)
-            .then(response => {
-                this.setState({ loading: false, purchasing: false })
-            })
-            .catch(error => {
-                this.setState({ loading: false, purchasing: false })
-            })
+        queryParams.push('price=' + this.state.totalPrice)
+        const queryString = queryParams.join('&')
+        
+        this.props.history.push({
+            pathname: '/checkout',
+            search: '?' + queryString
+        })
     }
     render() {
-        console.log(this.state.ingredients);
         
         const disabledInfo = {...this.state.ingredients}
         for(let key in disabledInfo){

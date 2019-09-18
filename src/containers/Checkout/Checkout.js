@@ -38,7 +38,6 @@ class Checkout extends Component {
     }
     
     render () {
-        console.log(this.state.ingredients);
      return (
         <div>
             <CheckoutSummary 

@@ -9,13 +9,13 @@
 
 }
 
-.Input {
+/* .Input {
     display: block;
     margin-top: 5px;
     padding: 10px;
     width: 100%;
     box-sizing: border-box;
-}
+} */
 
 @media (min-width: 600px) {
     .ContactData {

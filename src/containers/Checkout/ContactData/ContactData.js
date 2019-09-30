@@ -1,10 +1,13 @@
 import React, { Component } from 'react'
 import axios from '../../../axios-orders'
+import { connect } from 'react-redux'
 
 import Button from '../../../components/UI/Button/Button'
 import classes from './ContactData.css'
 import Spinner from '../../../components/UI/Spinner/Spinner'
 import Input from '../../../components/UI/Input/Input'
+import * as contactDataActions from '../../../store/actions/index'
+import withErrorHandler from '../../../hoc/withErrorHandler'
 
 class ContactData extends Component {
     state = {
@@ -82,7 +85,7 @@ class ContactData extends Component {
                         {value: 'cheapest', displayValue: 'Cheapest'},
                      ]
                 },
-                value: '',
+                value: 'fastest',
                 validation: {
                     required: true
                 },
@@ -115,19 +118,21 @@ class ContactData extends Component {
             formData[orderKey] = this.state.orderForm[orderKey].value
         }
         const order = {
-            ingredients: this.props.ingredients,
-            price: this.props.totalPrice,
+            ingredients: this.props.ingrd,
+            price: this.props.totalPrice.toFixed(2),
             deliveryMethod: 'fastest',
             orderData: formData
         }
-        axios.post('/orders.json', order)
-            .then(response => {
-                this.setState({ loading: false })
-                this.props.history.push('/')
-            })
-            .catch(error => {
-                this.setState({ loading: false })
-            })
+
+        this.props.onPurchaseBurgerStart(order)
+        // axios.post('/orders.json', order)
+        //     .then(response => {
+        //         this.setState({ loading: false })
+        //         this.props.history.push('/')
+        //     })
+        //     .catch(error => {
+        //         this.setState({ loading: false })
+        //     })
     }
 
     inputChangedHandler = (event, inputId) => {
@@ -146,7 +151,6 @@ class ContactData extends Component {
         for (let inputId in updatedForm) {
             formIsValid = updatedForm[inputId].valid && formIsValid
         }
-        console.log(updatedFormEl)
 
         this.setState({ orderForm: updatedForm, formIsValid: formIsValid })
     }
@@ -178,9 +182,7 @@ class ContactData extends Component {
                 <Button btnType='Success' disabled={!this.state.formIsValid} >ORDER</Button>
             </form>
         )
-        if (this.state.loading) {
-            console.log('spinner');
-            
+        if (this.props.loading) {
             form = <Spinner />
         }
      return (
@@ -192,4 +194,18 @@ class ContactData extends Component {
  }
 }
 
-export default ContactData
+const mapStateToPorops = state => {
+    return {
+        ingrd: state.ingrd.ingredients,
+        totalPrice: state.ingrd.totalPrice,
+        loading: state.order.loading
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        onPurchaseBurgerStart: (orderData) => dispatch(contactDataActions.purchaseBurger(orderData))
+    }
+}
+
+export default connect(mapStateToPorops, mapDispatchToProps) (withErrorHandler(ContactData, axios))

@@ -1,10 +1,11 @@
 import * as actionTypes from '../actions/actionTypes'
-import { updateObject } from '../utility/utility' 
+import { updateObject } from '../../shared/utility/utility' 
 
 const initialState = {
     ingredients: null,
     totalPrice: 4,
     error: false,
+    building: false
 }
 
 const INGREDIENTS_PRICES = {
@@ -19,7 +20,8 @@ const removeIngredients = (state, action) => {
     const updatedIngs = updateObject(state.ingredients, updatedIng)
     return updateObject(state, {
         ingredients: updatedIngs,
-        totalPrice: state.totalPrice + INGREDIENTS_PRICES[action.ingredientName]
+        totalPrice: state.totalPrice + INGREDIENTS_PRICES[action.ingredientName],
+        building: true
     })
 }
 const addIngredients = (state, action) => {
@@ -27,7 +29,8 @@ const addIngredients = (state, action) => {
     const updatedIngredients = updateObject(state.ingredients, updatedIngredient)
     const updatedState = {
         ingredients: updatedIngredients,
-        totalPrice: state.totalPrice + INGREDIENTS_PRICES[action.ingredientName]
+        totalPrice: state.totalPrice + INGREDIENTS_PRICES[action.ingredientName],
+        building: true
     }
     return updateObject(state, updatedState)
 }
@@ -45,7 +48,9 @@ const setIngredients = (state, action) => {
             meat: action.ingredients.meat
         },
         totalPrice: 4,
-        error: false})
+        error: false,
+        building: false
+    })
 }
 
 const reducer = (state = initialState, action) => {
@@ -58,7 +63,5 @@ const reducer = (state = initialState, action) => {
     }
     // return state
 }
-
-console.log('holla', reducer)
 
 export default reducer

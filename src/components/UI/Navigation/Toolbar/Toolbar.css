@@ -19,6 +19,7 @@
 }
 
 .Logo {
+    margin-top:5px;
     height: 80%;
 }
 
@@ -35,8 +36,18 @@
 
 
 @media (max-width: 499px) {
-    .DesktopOnly {
+    .DesktopOnly, .Logo {
         display: none;
     }
+    .BurgerMenuHover {
+        margin-top: 14px;
+    }
+}
+@media (min-width: 500px) {
+    .BurgerMenuHover {
+        display: none;
+    }
+    
+
 
 }

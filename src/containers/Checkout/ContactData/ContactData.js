@@ -8,6 +8,7 @@ import Spinner from '../../../components/UI/Spinner/Spinner'
 import Input from '../../../components/UI/Input/Input'
 import * as contactDataActions from '../../../store/actions/index'
 import withErrorHandler from '../../../hoc/withErrorHandler'
+import { updateObject, checkValidity } from '../../../shared/utility/utility'
 
 class ContactData extends Component {
     state = {
@@ -81,9 +82,9 @@ class ContactData extends Component {
                 elementType: 'select',
                 elementConfig: {
                     options: [
-                        {value: 'fastest', displayValue: 'Fastest'},
-                        {value: 'cheapest', displayValue: 'Cheapest'},
-                     ]
+                        { value: 'fastest', displayValue: 'Fastest' },
+                        { value: 'cheapest', displayValue: 'Cheapest' },
+                    ]
                 },
                 value: 'fastest',
                 validation: {
@@ -91,29 +92,16 @@ class ContactData extends Component {
                 },
                 valid: true
             },
-            }, 
+        },
         formIsValid: false,
         loading: false
-    }
-
-    checkValidity = (value, rules) => {
-        let isValid = true
-        if (rules.required){
-            isValid = value.trim() !== '' && isValid
-        }
-        if (rules.minLength) {
-            isValid = value.length >= rules.minLength && isValid
-        }
-        if ( rules.maxLength) {
-            isValid = value.length <= rules.maxLength && isValid 
-        }
-        return isValid
     }
 
     orderHandler = (event) => {
         event.preventDefault()
         this.setState({ loading: true })
         const formData = {}
+        // eslint-disable-next-line no-unused-vars
         for (let orderKey in this.state.orderForm) {
             formData[orderKey] = this.state.orderForm[orderKey].value
         }
@@ -121,10 +109,11 @@ class ContactData extends Component {
             ingredients: this.props.ingrd,
             price: this.props.totalPrice.toFixed(2),
             deliveryMethod: 'fastest',
-            orderData: formData
+            orderData: formData,
+            userId: this.props.userId
         }
 
-        this.props.onPurchaseBurgerStart(order)
+        this.props.onPurchaseBurgerStart(order, this.props.token)
         // axios.post('/orders.json', order)
         //     .then(response => {
         //         this.setState({ loading: false })
@@ -136,18 +125,17 @@ class ContactData extends Component {
     }
 
     inputChangedHandler = (event, inputId) => {
-        const updatedForm = {
-            ...this.state.orderForm
-        }
-        const updatedFormEl = {
-            ...updatedForm[inputId]
-        }
-        updatedFormEl.value = event.target.value
-        updatedForm[inputId] = updatedFormEl
-        updatedFormEl.valid = this.checkValidity(updatedFormEl.value, updatedFormEl.validation)
-        updatedFormEl.touched = true
-        
+        const updatedFormEl = updateObject(this.state.orderForm[inputId], {
+            value: event.target.value,
+            valid: checkValidity(event.target.value, this.state.orderForm[inputId].validation),
+            touched: true
+        })
+        const updatedForm = updateObject(this.state.orderForm, {
+            [inputId]: updatedFormEl
+        })
+
         let formIsValid = true;
+        // eslint-disable-next-line no-unused-vars
         for (let inputId in updatedForm) {
             formIsValid = updatedForm[inputId].valid && formIsValid
         }
@@ -155,8 +143,9 @@ class ContactData extends Component {
         this.setState({ orderForm: updatedForm, formIsValid: formIsValid })
     }
 
-    render () {
+    render() {
         const formElementsArray = []
+        // eslint-disable-next-line no-unused-vars
         for (let key in this.state.orderForm) {
             formElementsArray.push({
                 id: key,
@@ -165,47 +154,49 @@ class ContactData extends Component {
         }
 
         let form = (
-            <form onSubmit={this.orderHandler}> 
+            <form onSubmit={this.orderHandler}>
                 {formElementsArray.map(elm => {
-                    return <Input 
-                                key={elm.id}
-                                elementType={elm.config.elementType}
-                                elementConfig={elm.config.elementConfig}
-                                value={elm.config.value}
-                                invalid={!elm.config.valid}
-                                shouldValidate={elm.config.validation}
-                                touched={elm.config.touched}
-                                changed={(event) => this.inputChangedHandler(event, elm.id)}
-                                />
+                    return <Input
+                        key={elm.id}
+                        elementType={elm.config.elementType}
+                        elementConfig={elm.config.elementConfig}
+                        value={elm.config.value}
+                        invalid={!elm.config.valid}
+                        shouldValidate={elm.config.validation}
+                        touched={elm.config.touched}
+                        changed={(event) => this.inputChangedHandler(event, elm.id)}
+                    />
                 })}
-                
+
                 <Button btnType='Success' disabled={!this.state.formIsValid} >ORDER</Button>
             </form>
         )
         if (this.props.loading) {
             form = <Spinner />
         }
-     return (
-        <div className={classes.ContactData}>
-            <h4>Enter your Contact Data</h4>
-            { form }
-        </div>
-    )
- }
+        return (
+            <div className={classes.ContactData}>
+                <h4>Enter your Contact Data</h4>
+                {form}
+            </div>
+        )
+    }
 }
 
 const mapStateToPorops = state => {
     return {
         ingrd: state.ingrd.ingredients,
         totalPrice: state.ingrd.totalPrice,
-        loading: state.order.loading
+        loading: state.order.loading,
+        token: state.auth.token,
+        userId: state.auth.userId
     }
 }
 
 const mapDispatchToProps = dispatch => {
     return {
-        onPurchaseBurgerStart: (orderData) => dispatch(contactDataActions.purchaseBurger(orderData))
+        onPurchaseBurgerStart: (orderData, token) => dispatch(contactDataActions.purchaseBurger(orderData, token))
     }
 }
 
-export default connect(mapStateToPorops, mapDispatchToProps) (withErrorHandler(ContactData, axios))
+export default connect(mapStateToPorops, mapDispatchToProps)(withErrorHandler(ContactData, axios))

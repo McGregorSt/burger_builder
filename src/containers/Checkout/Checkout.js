@@ -33,43 +33,43 @@ class Checkout extends Component {
     checkoutCancel = () => {
         this.props.history.goBack()
     }
-    
+
     checkoutContinue = () => {
         this.props.history.push('/checkout/contact-data')
-        
+
     }
-    
-    render () {
+
+    render() {
         let summary = <Redirect to='/' />
         if (this.props.ingrd) {
-            const purchasedRedirect = this.props.purchased ? <Redirect to='/' /> : null
+            const purchasedRedirect = this.props.purchased ? <Redirect to='/burger_builder' /> : null
             summary = (
                 <div>
                     {purchasedRedirect}
-                    <CheckoutSummary 
+                    <CheckoutSummary
                         ingredients={this.props.ingrd}
-                        checkoutCancel={this.checkoutCancel} 
-                        checkoutContinue={this.checkoutContinue} 
-                        />
-                    <Route 
-                        path={this.props.match.path + '/contact-data'} 
+                        checkoutCancel={this.checkoutCancel}
+                        checkoutContinue={this.checkoutContinue}
+                    />
+                    <Route
+                        path={this.props.match.path + '/contact-data'}
                         render={() => (
-                            <ContactData  
+                            <ContactData
                                 ingredients={this.props.ingrd}
-                                totalPrice={this.props.totalPrice} 
+                                totalPrice={this.props.totalPrice}
                                 {...this.props}
-                                />)
-                            }
+                            />)
+                        }
                     />
                 </div>
             )
         }
-     return (
-        <div>
-            {summary}
-        </div>
-    )
- }
+        return (
+            <div>
+                {summary}
+            </div>
+        )
+    }
 }
 
 const mapStateToPorops = state => {
@@ -80,4 +80,4 @@ const mapStateToPorops = state => {
     }
 }
 
-export default connect(mapStateToPorops) (Checkout)
+export default connect(mapStateToPorops)(Checkout)
